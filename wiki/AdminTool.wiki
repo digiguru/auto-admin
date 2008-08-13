@@ -1,0 +1,6 @@
+#summary The schema that this project will reside in
+
+= Introduction =
+
+The schema is given to isolate it from other applciations in your database, and tighten security
+
