@@ -146,6 +146,7 @@ Namespace DataLayer
         ''' Calls the Dispose method on the underlying datareader.
         ''' </summary>
         Public Sub Dispose() Implements System.IDisposable.Dispose
+            Me.Close()
             mDataReader.Dispose()
         End Sub
 

@@ -5,6 +5,8 @@ Partial Class StoredProcedureForm
 
     Private Const QuerystringProcedure As String = "Procedure"
 
+    Private LoggedInUser As User
+
 
 
     Private _schemaName As String
@@ -35,8 +37,14 @@ Partial Class StoredProcedureForm
         End Set
     End Property
 
+    Private Sub GetLoggedInUser()
+        LoggedInUser = New User
+        LoggedInUser.ID = 1
+        LoggedInUser.Username = "Adam"
+    End Sub
     Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
         Dim queryString As String = Request.QueryString(QuerystringProcedure)
+        GetLoggedInUser()
         If Not String.IsNullOrEmpty(queryString) Then
             Dim lstOfStrings As String() = queryString.Split(".")
             If lstOfStrings.Length > 1 Then
@@ -85,16 +93,49 @@ Partial Class StoredProcedureForm
             Me.divForm.Controls.Add(dynamicControl)
         Next
     End Sub
-    Protected Sub btnSubmit_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSubmit.Click
-        Dim dal As New DataLayer.DAL
-        Dim params As New Generic.List(Of Data.Common.DbParameter)
-        For Each param As ModelLayer.IParameterView In Me.divForm.Controls
-            params.Add(dal.createParameter(param.ParameterName, param.Value)) 'param.StringValue()
+    Private Sub Audit(ByVal ParamsValue As String)
+        Using dal As New DataLayer.DAL
+
+            Dim params As New Generic.List(Of Data.Common.DbParameter)
+            params.Add(dal.createParameter("Schema", SchemaName)) 'param.StringValue()
+            params.Add(dal.createParameter("ProcedureName", ProcedureName))
+            params.Add(dal.createParameter("Params", ParamsValue))
+            params.Add(dal.createParameter("UserID", LoggedInUser.ID))
+            '@Schema varchar(50) = null, 
+
+            '@ProcedureName varchar(MAx), 
+            '@Params varchar(MAx), 
+            '@UserID int
+            dal.spExecuteNonQuery("AdminTool.InsertAudit", params.ToArray)
+
+        End Using
+    End Sub
+    Private Function WriteParams(ByVal params As Generic.List(Of Data.Common.DbParameter)) As String
+        Dim s As New StringBuilder
+        For Each param In params
+            s.Append(param.ParameterName).Append(":").Append(param.Value)
         Next
-        Dim a As System.Data.DataTable = dal.spgetDataTable(String.Format("{0}.{1}", SchemaName, ProcedureName), params.ToArray)
-        gridDisplay.DataSource = a
-        gridDisplay.DataBind()
-        'ProcedureName
+        Return s.ToString
+    End Function
+    Protected Sub btnSubmit_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSubmit.Click
+        Using dal As New DataLayer.DAL
+            Dim params As New Generic.List(Of Data.Common.DbParameter)
+            For Each param As ModelLayer.IParameterView In Me.divForm.Controls
+                params.Add(dal.createParameter(param.ParameterName, param.Value)) 'param.StringValue()
+            Next
+
+            Dim a As System.Data.DataSet = dal.spgetDataSet(String.Format("{0}.{1}", SchemaName, ProcedureName), params.ToArray)
+            Audit(WriteParams(params))
+            For Each Table As System.Data.DataTable In a.Tables
+                Dim dynamicResultsArea As GenericResultsTemplateBase
+                dynamicResultsArea = LoadControl("ResultsTemplate/GenericResultsTemplate.ascx")
+
+                dynamicResultsArea.SetValue(Table)
+                Me.divResults.Controls.Add(dynamicResultsArea)
+            Next
+            Me.divResults.DataBind()
+        End Using
+
     End Sub
 
     Public Function GetParameterValueByName(ByVal parameterName As String) As Object
