@@ -7,10 +7,50 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Untitled Page</title>
+
+<style>
+body 
+{
+	font-family: Arial; font-size: 0.8em;
+}
+.parameter 
+{
+	display: block; float: none; clear: both; width: 700px;
+}
+.parameter label
+{
+width: 12em;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block
+}
+.parameter div.input
+{display: inline;}
+.parameter div.nullable 
+{
+width: 12px;
+display: inline;
+}
+.parameter div.not-nullable 
+{
+display: inline;
+}
+.parameter div.input>table
+{
+margin-left: 184px;
+}
+</style>
 </head>
 <body>
+
+
     <form id="form1" runat="server">
     <div>
+    <asp:DropDownList ID="lstDatabase" runat="server" AutoPostBack="true">
+    </asp:DropDownList>
+    <asp:DropDownList ID="lstSchemas" runat="server" AutoPostBack="true">
+    </asp:DropDownList>
     <asp:DropDownList ID="lstProcedures" runat="server" AutoPostBack="true">
     </asp:DropDownList>
     </div>

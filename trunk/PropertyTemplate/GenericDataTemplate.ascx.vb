@@ -27,7 +27,8 @@ Partial Class PropertyTemplate_GenericDataTemplate
 
     End Sub
     Private Sub ShowHideNullField()
-            divNullable.Visible = Nullable
+        divNullable.Visible = Nullable
+        divNotNullable.Visible = Not Nullable
       End Sub
     Private Sub ShowHideInputField()
         divInput.Visible = Not NullChecked

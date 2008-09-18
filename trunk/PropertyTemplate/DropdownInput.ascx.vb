@@ -1,7 +1,7 @@
 ﻿
 Partial Class PropertyTemplate_DropdownInput
     Inherits GenericDataInputBase
-    Dim dal As New DataLayer.DAL
+    Dim dal As DataLayer.DAL
 
     Private _parameterCollection As Generic.List(Of Data.Common.DbParameter)
     Public Property ParameterCollection() As Generic.List(Of Data.Common.DbParameter)
@@ -75,6 +75,7 @@ Partial Class PropertyTemplate_DropdownInput
         ResetList()
         AddPleaseSelectItem()
         Dim FullyQualifiedProcedureName As String = boundColumnParams.BoundObject
+        dal = New DataLayer.DAL
 
         GetParameters(JustProcedureName(FullyQualifiedProcedureName))
 
@@ -95,9 +96,13 @@ Partial Class PropertyTemplate_DropdownInput
             Next
 
         Catch ex As Exception
+            Throw ex
+        Finally
+            dal.Dispose()
 
         End Try
         ReselectSavedItem(saveItem)
+
         Me.lstValue.DataBind()
 
     End Sub

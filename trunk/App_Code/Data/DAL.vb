@@ -20,6 +20,8 @@ Imports System.Web.Configuration
 
 Namespace DataLayer
     Public Class DAL
+        Implements IDisposable
+
 
         Private cn As Data.Common.DbConnection
         Private cmd As Data.Common.DbCommand
@@ -32,9 +34,11 @@ Namespace DataLayer
         Sub New()
             'sqlstr = "data source=220.227.236.26;user id=hitched;pwd=aressindia;database=hitched"
             'sqlstr = "data source=220.227.236.29;user id=sa;pwd=aressindia;database=hitched"
-            connectionstr = WebConfigurationManager.ConnectionStrings("constr").ConnectionString()
+            connectionstr = WebConfigurationManager.ConnectionStrings("constr").ConnectionString() '
+            If String.IsnullOrEmpty(connectionstr) Then
+                Throw New Exception("No Connection")
+            End If
         End Sub
-
         Function getConnectionString() As String
             Return connectionstr
         End Function
@@ -42,34 +46,41 @@ Namespace DataLayer
             Try
                 cn = New SqlConnection(connectionstr)
             Catch ex As Exception
-
                 Return ex
             End Try
             Return cn
         End Function
 
         Function spGetData(ByVal spname As String, ByVal param As Common.DbParameter()) As DataTable
-            Dim da As SqlDataAdapter
+            Try
 
-            dt = New DataTable()
-            Dim cnobj As Object
-            Dim i As Integer
-            cnobj = getConnection()
+                Dim da As SqlDataAdapter
 
-            cn = CType(cnobj, SqlConnection)
-            cmd = New SqlCommand(spname, cnobj)
-            cmd.CommandType = CommandType.StoredProcedure
-            cmd.CommandTimeout = 60
-            If Not param Is Nothing Then
-                For i = 0 To param.Length - 1
-                    cmd.Parameters.Add(param(i))
-                Next
-            End If
+                dt = New DataTable()
+                Dim i As Integer
+                cn = getConnection()
 
-            da = New SqlDataAdapter(cmd)
-            da.Fill(dt)
+                cmd = New SqlCommand(spname, cn)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.CommandTimeout = 60
+                If Not param Is Nothing Then
+                    For i = 0 To param.Length - 1
+                        cmd.Parameters.Add(param(i))
+                    Next
+                End If
 
+                da = New SqlDataAdapter(cmd)
+                da.Fill(dt)
+
+                Return dt
+
+            Catch ex As Exception
+                Throw ex
+            Finally
+                cn.Close()
+            End Try
             Return dt
+
         End Function
         Function createParameter( _
     ByVal name As String, _
@@ -83,19 +94,18 @@ Namespace DataLayer
         ByVal str As String, _
         Optional ByVal param As System.Data.Common.DbParameter() = Nothing _
         ) As IDataReader
-            Dim cnobj As Object
+            
 
-            cnobj = getConnection()
+            cn = getConnection()
             Try
 
-                cn = CType(cnobj, SqlConnection)
                 'added By Pankaj For Connection Lost
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
                 cn.Open()
 
-                cmd = New SqlCommand(str, cnobj)
+                cmd = New SqlCommand(str, cn)
                 ' cmd.CommandTimeout = 60
                 cmd.CommandType = CommandType.StoredProcedure
 
@@ -113,8 +123,9 @@ Namespace DataLayer
 
                 dr = New SafeDataReader(cmd.ExecuteReader)
             Catch ex As Exception
-                Throw ex
+                cn.Close()
 
+                Throw ex
                 'Return ex.ToString()
             End Try
             Return dr
@@ -126,19 +137,17 @@ Namespace DataLayer
 
         Function spExecuteNonQuery(ByVal spname As String, ByVal param As System.Data.Common.DbParameter()) As String
             Dim Result As Integer
-            Dim cnobj As Object
-            cnobj = getConnection()
+            
 
-
-                Try
-                cn = CType(cnobj, SqlConnection)
+            Try
+                cn = getConnection()
 
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
                 cn.Open()
 
-                cmd = New SqlCommand(spname, cnobj)
+                cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
                 '                   cmd.CommandTimeout = 60
                 Dim p As New SqlParameter
@@ -154,14 +163,13 @@ Namespace DataLayer
                 End If
 
                 Result = cmd.ExecuteNonQuery()
-                cn.Close()
                 Return Result
             Catch ex As Exception
+                Throw ex
+            Finally
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
-                Return ex.ToString()
-
             End Try
             Return Result
         End Function
@@ -172,16 +180,15 @@ Namespace DataLayer
         'Purpose : Execute Scalar Store Procedure having Parameters List
         Function spExeScalar(ByVal spname As String, ByVal param As System.Data.Common.DbParameter()) As Integer
             Dim Result As Integer
-            Dim cnobj As Object
-            cnobj = getConnection()
-                Try
-                cn = CType(cnobj, SqlConnection)
+            Try
+                cn = getConnection()
+                cn = CType(cn, SqlConnection)
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
                 cn.Open()
 
-                cmd = New SqlCommand(spname, cnobj)
+                cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
                 '                  cmd.CommandTimeout = 60
                 Dim p As New SqlParameter
@@ -197,24 +204,24 @@ Namespace DataLayer
 
                 Result = cmd.ExecuteScalar()
 
-                cn.Close()
-            Catch ex As Exception
 
+            Catch ex As Exception
+            Finally
+                cn.Close()
             End Try
             Return Result
         End Function
         Function spExeScalarString(ByVal spname As String, ByVal param As System.Data.Common.DbParameter()) As String
             Dim Result As String
-            Dim cnobj As Object
-            cnobj = getConnection()
-                Try
-                cn = CType(cnobj, SqlConnection)
+            Try
+                cn = getConnection()
+                cn = CType(cn, SqlConnection)
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
                 cn.Open()
 
-                cmd = New SqlCommand(spname, cnobj)
+                cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
                 '                 cmd.CommandTimeout = 60
                 Dim p As New SqlParameter
@@ -241,16 +248,14 @@ Namespace DataLayer
         Function spgetDataTable(ByVal spname As String, ByVal param As System.Data.Common.DbParameter()) As DataTable
             Dim da As SqlDataAdapter
             dt = New DataTable()
-            Dim cnobj As Object
-            cnobj = getConnection()
+            cn = getConnection()
             dt = New DataTable()
-            cn = CType(cnobj, SqlConnection)
-
+            
 
             cn.Open()
 
 
-            cmd = New SqlCommand(spname, cnobj)
+            cmd = New SqlCommand(spname, cn)
             cmd.CommandType = CommandType.StoredProcedure
             cmd.CommandTimeout = 60
             'Dim p As New SqlParameter
@@ -274,25 +279,64 @@ Namespace DataLayer
             'Return Nothing
         End Function
 
+        Function spgetDataSet(ByVal spname As String, ByVal param As System.Data.Common.DbParameter()) As DataSet
+            Try
 
+
+                Dim da As SqlDataAdapter
+                ds = New DataSet()
+                cn = getConnection()
+                'dt = New DataTable()
+                
+
+                cn.Open()
+
+
+                cmd = New SqlCommand(spname, cn)
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.CommandTimeout = 60
+                'Dim p As New SqlParameter
+                'cmd.Parameters.Add(param)
+                If Not param Is Nothing Then
+
+
+                    For Each p As Common.DbParameter In param
+                        cmd.Parameters.Add(p)
+                        '                    If p.Direction = ParameterDirection.InputOutput And p.Value Is Nothing Then
+                        ' p.Value = Nothing
+                        'End If
+                        'cmd.Parameters.Add(p)
+                    Next p
+                End If
+                da = New SqlDataAdapter(cmd) '(spname, cn)
+                da.Fill(ds)
+                Return ds
+            Catch ex As Exception
+                Throw ex
+            Finally
+                cn.Close()
+
+            End Try
+            'cmd.ExecuteReader()
+            'Return Nothing
+        End Function
         'Addedd By: Pankaj H Kshirsagar
         'Function Name : spCmdExecuteNonQuery
         'Date : 31/10/2007
         'Purpose : Execute NonQuery Store Procedure having Parameters List
         Function spCmdExecuteNonQuery(ByVal spname As String, ByVal cmd As Data.Common.DbCommand) As Integer
             Dim Result As Integer
-            Dim cnobj As Object
-            cnobj = getConnection()
+            cn = getConnection()
 
             Try
-                cn = CType(cnobj, SqlConnection)
+                cn = CType(cn, SqlConnection)
 
                 If cn.State = ConnectionState.Open Then
                     cn.Close()
                 End If
                 cn.Open()
 
-                cmd = New SqlCommand(spname, cnobj)
+                cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
                 cmd.CommandTimeout = 60
                 'Dim p As New SqlParameter
@@ -306,12 +350,58 @@ Namespace DataLayer
                 Result = cmd.ExecuteNonQuery()
                 cn.Close()
             Catch ex As Exception
-                If cn.State = ConnectionState.Open Then
-                    cn.Close()
-                End If
+                CloseConnection()
             End Try
             Return Result
         End Function
+
+        Private Sub CloseConnection()
+            If cn.State = ConnectionState.Open Then
+                cn.Close()
+            End If
+        End Sub
+        Private Sub CloseReader()
+            If Not dr Is Nothing Then
+                dr.Close()
+                dr.Dispose()
+            End If
+        End Sub
+        Private Sub CloseDataSet()
+            If Not ds Is Nothing Then
+                ds.Dispose()
+            End If
+        End Sub
+        Private Sub CloseDataTable()
+            If Not dt Is Nothing Then
+                dt.Dispose()
+            End If
+        End Sub
+        Private disposedValue As Boolean = False        ' To detect redundant calls
+
+        ' IDisposable
+        Protected Overridable Sub Dispose(ByVal disposing As Boolean)
+            If Not Me.disposedValue Then
+                If disposing Then
+                    ' TODO: free other state (managed objects).
+                    CloseConnection()
+                    CloseReader()
+                    CloseDataSet()
+                    CloseDataTable()
+                End If
+                ' TODO: free your own state (unmanaged objects).
+                ' TODO: set large fields to null.
+            End If
+            Me.disposedValue = True
+        End Sub
+
+#Region " IDisposable Support "
+        ' This code added by Visual Basic to correctly implement the disposable pattern.
+        Public Sub Dispose() Implements IDisposable.Dispose
+            ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+            Dispose(True)
+            GC.SuppressFinalize(Me)
+        End Sub
+#End Region
 
     End Class
 End Namespace
