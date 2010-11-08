@@ -6,7 +6,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Untitled Page</title>
+	<title>Untitled Page</title>
 
 <style>
 body 
@@ -45,16 +45,16 @@ margin-left: 184px;
 <body>
 
 
-    <form id="form1" runat="server">
-    <div>
-    <asp:DropDownList ID="lstDatabase" runat="server" AutoPostBack="true">
-    </asp:DropDownList>
-    <asp:DropDownList ID="lstSchemas" runat="server" AutoPostBack="true">
-    </asp:DropDownList>
-    <asp:DropDownList ID="lstProcedures" runat="server" AutoPostBack="true">
-    </asp:DropDownList>
-    </div>
-    <uc1:StoredProcedureForm QueryString="<%=QuerystringProcedure %>" ID="StoredProcedureForm1" runat="server" SchemaName="AdminTool" />
-    </form>
+	<form id="form1" runat="server">
+	<div>
+	<asp:DropDownList ID="lstDatabase" runat="server" AutoPostBack="true">
+	</asp:DropDownList>
+	<asp:DropDownList ID="lstSchemas" runat="server" AutoPostBack="true">
+	</asp:DropDownList>
+	<asp:DropDownList ID="lstProcedures" runat="server" AutoPostBack="true">
+	</asp:DropDownList>
+	</div>
+	<uc1:StoredProcedureForm QueryString="<%=QuerystringProcedure %>" ID="StoredProcedureForm1" runat="server" SchemaName="AdminTool" />
+	</form>
 </body>
 </html>
