@@ -34,7 +34,7 @@ Namespace DataLayer
         Sub New()
             'sqlstr = "data source=220.227.236.26;user id=hitched;pwd=aressindia;database=hitched"
             'sqlstr = "data source=220.227.236.29;user id=sa;pwd=aressindia;database=hitched"
-            connectionstr = WebConfigurationManager.ConnectionStrings("constr").ConnectionString() '
+            connectionstr = WebConfigurationManager.ConnectionStrings("ReportConStr").ConnectionString() '
             If String.IsnullOrEmpty(connectionstr) Then
                 Throw New Exception("No Connection")
             End If

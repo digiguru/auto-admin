@@ -154,7 +154,7 @@ Partial Class _Default
     End Sub
     Private Function SetDefaultDatabase() As Boolean
         Dim isValid As Boolean = True
-        Dim connString As String = System.Web.Configuration.WebConfigurationManager.ConnectionStrings("constr").ConnectionString
+        Dim connString As String = System.Web.Configuration.WebConfigurationManager.ConnectionStrings("ReportConStr").ConnectionString
         If connString = System.Web.Configuration.WebConfigurationManager.AppSettings("ConnectionString.Development") Then
             lstDatabase.SelectedValue = ConnectionString.Development
         ElseIf connString = System.Web.Configuration.WebConfigurationManager.AppSettings("ConnectionString.Production") Then
@@ -187,13 +187,13 @@ Partial Class _Default
        
         Select Case database
             Case ConnectionString.Development
-                myConfiguration.ConnectionStrings.ConnectionStrings.Item("constr").ConnectionString = myConfiguration.AppSettings.Settings.Item("ConnectionString.Development").Value
+                myConfiguration.ConnectionStrings.ConnectionStrings.Item("ReportConStr").ConnectionString = myConfiguration.AppSettings.Settings.Item("ConnectionString.Development").Value
                 PopulateProcedures()
             Case ConnectionString.Production
-                myConfiguration.ConnectionStrings.ConnectionStrings.Item("constr").ConnectionString = myConfiguration.AppSettings.Settings.Item("ConnectionString.Production").Value
+                myConfiguration.ConnectionStrings.ConnectionStrings.Item("ReportConStr").ConnectionString = myConfiguration.AppSettings.Settings.Item("ConnectionString.Production").Value
                 PopulateProcedures()
             Case Else
-                myConfiguration.ConnectionStrings.ConnectionStrings.Item("constr").ConnectionString = ""
+                myConfiguration.ConnectionStrings.ConnectionStrings.Item("ReportConStr").ConnectionString = ""
         End Select
 
         myConfiguration.Save()

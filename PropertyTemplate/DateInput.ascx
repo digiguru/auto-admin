@@ -1,5 +1,7 @@
 ﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="DateInput.ascx.vb" Inherits="PropertyTemplate_DateInput" %>
+<%@ Register Assembly="BasicFrame.WebControls.BasicDatePicker" Namespace="BasicFrame.WebControls"
+    TagPrefix="BDP" %>
 
-<asp:Calendar ID="datSelector" runat="server"></asp:Calendar>
 
-
+<BDP:BasicDatePicker ID="datSelector" runat="server">
+</BDP:BasicDatePicker>
