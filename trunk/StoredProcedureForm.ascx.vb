@@ -1,5 +1,5 @@
 ﻿
-Partial Class StoredProcedureForm
+Public Class StoredProcedureForm
     Inherits GenericFormBase
 
 
