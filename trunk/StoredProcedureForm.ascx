@@ -1,4 +1,4 @@
-﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="StoredProcedureForm.ascx.vb" Inherits="StoredProcedureForm" %>
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="StoredProcedureForm.ascx.vb" Inherits="StoredProcedureForm" CodeFileBaseClass="GenericFormBase" %>
 <fieldset>
     <legend><asp:Literal ID="divLegend" runat="server"></asp:Literal></legend>
     <asp:PlaceHolder ID="divForm" runat="server">

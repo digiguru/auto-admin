@@ -1,4 +1,4 @@
-﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="GenericDataTemplate.ascx.vb" Inherits="PropertyTemplate_GenericDataTemplate" %>
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="GenericDataTemplate.ascx.vb" Inherits="PropertyTemplate_GenericDataTemplate" CodeFileBaseClass="GenericDataTemplateBase" %>
 <div class="parameter">
     <label><%=ParameterName%></label>
     <asp:Panel ID="divNullable" runat="server" class="nullable">
