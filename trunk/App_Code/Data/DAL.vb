@@ -356,8 +356,10 @@ Namespace DataLayer
         End Function
 
         Private Sub CloseConnection()
-            If cn.State = ConnectionState.Open Then
-                cn.Close()
+            If Not cn Is Nothing Then
+                If cn.State = ConnectionState.Open Then
+                    cn.Close()
+                End If
             End If
         End Sub
         Private Sub CloseReader()

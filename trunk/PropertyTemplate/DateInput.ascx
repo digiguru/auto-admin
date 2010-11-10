@@ -3,5 +3,6 @@
     TagPrefix="BDP" %>
 
 
-<BDP:BasicDatePicker ID="datSelector" runat="server">
-</BDP:BasicDatePicker>
+
+<BDP:BDPLite ID="datSelector" runat="server">
+</BDP:BDPLite>

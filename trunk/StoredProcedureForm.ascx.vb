@@ -4,6 +4,8 @@ Public Class StoredProcedureForm
 
 
     Private Const QuerystringProcedure As String = "Procedure"
+    Private Const QuerystringResultsType As String = "Results"
+    Private Const QuerystringParameters As String = "Parameters"
 
     Private LoggedInUser As User
 
@@ -43,17 +45,40 @@ Public Class StoredProcedureForm
         LoggedInUser.Username = "Adam"
     End Sub
     Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
-        Dim queryString As String = Request.QueryString(QuerystringProcedure)
+        Dim procName As String = Request.QueryString(QuerystringProcedure)
+        Dim resultsType As String = Request.QueryString(queryStringResultsType)
+        Dim paramsString As String = Request.QueryString(QuerystringParameters)
         GetLoggedInUser()
-        If Not String.IsNullOrEmpty(queryString) Then
-            Dim lstOfStrings As String() = queryString.Split(".")
+        If Not String.IsNullOrEmpty(procName) Then
+            Dim lstOfStrings As String() = procName.Split(".")
             If lstOfStrings.Length > 1 Then
                 SchemaName = lstOfStrings(0)
                 ProcedureName = lstOfStrings(1)
                 PopulateParameters(ProcedureName)
             End If
         End If
+
+      
+        If Not String.IsNullOrEmpty(resultsType) Then
+            Me.LoadResults(resultsType, ReadParmasFromQuerystring(paramsString))
+        End If
+
     End Sub
+    Private Function ReadParmasFromQuerystring(ByVal paramsString As String) As Data.Common.DbParameter()
+        Dim lst As New Generic.List(Of Data.Common.DbParameter)
+        Using dal As New DataLayer.DAL
+            If Not String.IsNullOrEmpty(paramsString) Then
+                For Each parameterItem As String In paramsString.Split(",")
+                    Dim nameValuePair As String() = parameterItem.Split(":")
+                    lst.Add(dal.createParameter(nameValuePair(0), nameValuePair(1)))
+            
+                Next
+
+            End If
+        End Using
+        Return lst.ToArray
+    End Function
+
 
     Private Sub PopulateParameters(ByVal ProcedureName As String)
         divLegend.Text = ProcedureName
@@ -110,32 +135,47 @@ Public Class StoredProcedureForm
 
         End Using
     End Sub
-    Private Function WriteParams(ByVal params As Generic.List(Of Data.Common.DbParameter)) As String
+    Private Function WriteParams(ByVal params As Data.Common.DbParameter()) As String
         Dim s As New StringBuilder
         For Each param In params
             s.Append(param.ParameterName).Append(":").Append(param.Value)
         Next
         Return s.ToString
     End Function
-    Protected Sub btnSubmit_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSubmit.Click
+
+    Public Sub LoadResults(ByVal ResultsPage As String, ByVal params As Data.Common.DbParameter())
         Using dal As New DataLayer.DAL
-            Dim params As New Generic.List(Of Data.Common.DbParameter)
+
+
+            Dim a As System.Data.DataSet = dal.spgetDataSet(String.Format("{0}.{1}", SchemaName, ProcedureName), params)
+            Audit(WriteParams(params))
+            Dim dynamicResultsArea As GenericResultsTemplateBase
+            dynamicResultsArea = LoadControl(ResultsPage)
+
+            dynamicResultsArea.SetValue(a)
+            Me.divResults.Controls.Add(dynamicResultsArea)
+
+
+            Me.divResults.DataBind()
+        End Using
+    End Sub
+    Private Function GetParametersFromForm() As Data.Common.DbParameter()
+        Dim params As New Generic.List(Of Data.Common.DbParameter)
+        Using dal As New DataLayer.DAL
             For Each param As ModelLayer.IParameterView In Me.divForm.Controls
                 params.Add(dal.createParameter(param.ParameterName, param.Value)) 'param.StringValue()
             Next
-
-            Dim a As System.Data.DataSet = dal.spgetDataSet(String.Format("{0}.{1}", SchemaName, ProcedureName), params.ToArray)
-            Audit(WriteParams(params))
-            For Each Table As System.Data.DataTable In a.Tables
-                Dim dynamicResultsArea As GenericResultsTemplateBase
-                dynamicResultsArea = LoadControl("ResultsTemplate/GenericResultsTemplate.ascx")
-
-                dynamicResultsArea.SetValue(Table)
-                Me.divResults.Controls.Add(dynamicResultsArea)
-            Next
-            Me.divResults.DataBind()
         End Using
-
+        Return params.ToArray
+    End Function
+    Protected Sub btnExportToExcel_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnExportToExcel.Click
+        LoadResults(ResultsTypes.Excel, GetParametersFromForm)
+    End Sub
+    Protected Sub btnExportToXML_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnExportToXML.Click
+        LoadResults(ResultsTypes.XML, GetParametersFromForm)
+    End Sub
+    Protected Sub btnSubmit_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSubmit.Click
+        LoadResults(ResultsTypes.Standard, GetParametersFromForm)
     End Sub
 
     Public Function GetParameterValueByName(ByVal parameterName As String) As Object
