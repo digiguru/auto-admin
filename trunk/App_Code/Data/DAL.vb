@@ -39,6 +39,11 @@ Namespace DataLayer
                 Throw New Exception("No Connection")
             End If
         End Sub
+        Public ReadOnly Property DBTimeoutInSeconds As Integer
+            Get
+                Return WebConfigurationManager.AppSettings("DBTimeoutInSeconds")
+            End Get
+        End Property
         Function getConnectionString() As String
             Return connectionstr
         End Function
@@ -62,7 +67,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 If Not param Is Nothing Then
                     For i = 0 To param.Length - 1
                         cmd.Parameters.Add(param(i))
@@ -106,7 +111,7 @@ Namespace DataLayer
                 cn.Open()
 
                 cmd = New SqlCommand(str, cn)
-                ' cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 cmd.CommandType = CommandType.StoredProcedure
 
                 If Not param Is Nothing Then
@@ -149,7 +154,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                '                   cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 Dim p As New SqlParameter
 
                 'cmd.Parameters.Add(param)
@@ -190,7 +195,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                '                  cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 Dim p As New SqlParameter
                 'cmd.Parameters.Add(param)
                 If Not param Is Nothing Then
@@ -223,7 +228,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                '                 cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 Dim p As New SqlParameter
                 'cmd.Parameters.Add(param)
                 For Each p In param
@@ -257,7 +262,7 @@ Namespace DataLayer
 
             cmd = New SqlCommand(spname, cn)
             cmd.CommandType = CommandType.StoredProcedure
-            cmd.CommandTimeout = 60
+            cmd.CommandTimeout = DBTimeoutInSeconds
             'Dim p As New SqlParameter
             'cmd.Parameters.Add(param)
             If Not param Is Nothing Then
@@ -294,7 +299,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 'Dim p As New SqlParameter
                 'cmd.Parameters.Add(param)
                 If Not param Is Nothing Then
@@ -338,7 +343,7 @@ Namespace DataLayer
 
                 cmd = New SqlCommand(spname, cn)
                 cmd.CommandType = CommandType.StoredProcedure
-                cmd.CommandTimeout = 60
+                cmd.CommandTimeout = DBTimeoutInSeconds
                 'Dim p As New SqlParameter
                 ''cmd.Parameters.Add(param)
                 'For Each p In param

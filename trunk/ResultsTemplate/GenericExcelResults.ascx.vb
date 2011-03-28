@@ -12,7 +12,9 @@ Partial Class ResultsTemplate_GenericExcelResults
 
 
 
-
+    Public Class Role
+        Public Name As String
+    End Class
     Public Overrides Sub SetValue(ByVal ds As DataSet)
         'Response.ContentType = "application/ms-excel"
         'Response.Output.Write(ds.GetXml)
