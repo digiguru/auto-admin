@@ -132,10 +132,14 @@ Partial Class _Default
             lstProcedures.Items.Add(New WebControls.ListItem(procedure.Name, String.Format("{0}.{1}", procedure.Schema, procedure.Name)))
         Next
     End Sub
-    Protected Sub lstProcedures_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles lstProcedures.SelectedIndexChanged
-        Dim ProcValue As String = sender.SelectedValue
-        Response.Redirect(String.Format("?{0}={1}", QuerystringProcedure, ProcValue))
 
+    Private Function GetProcedureQueryString() As String
+        Dim ProcValue As String = lstProcedures.SelectedValue
+        Return String.Format("{0}={1}", QuerystringProcedure, ProcValue)
+    End Function
+
+    Protected Sub lstProcedures_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles lstProcedures.SelectedIndexChanged
+        Response.Redirect(String.Concat("?", GetProcedureQueryString, "&", GetSchemaQueryString))
         'PopulateParameters(ProcValue)
     End Sub
    
@@ -145,12 +149,19 @@ Partial Class _Default
         SelectDatabseConnection(database)
        
     End Sub
+    Private Function GetSchemaQueryString() As String
+        If Not lstSchemas.SelectedValue = "0" Then
+            SelectedSchema = lstSchemas.SelectedValue
+        End If
+        Return String.Format("{0}={1}", QuerystringSchema, SelectedSchema)
+    End Function
+
     Protected Sub lstSchemas_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles lstSchemas.SelectedIndexChanged
         If Not lstSchemas.SelectedValue = "0" Then
             SelectedSchema = lstSchemas.SelectedValue
         End If
-        Response.Redirect(String.Format("?{0}={1}", QuerystringSchema, SelectedSchema))
-        PopulateProcedures(SelectedSchema)
+        Response.Redirect(String.Concat("?", GetSchemaQueryString))
+        'PopulateProcedures(SelectedSchema)
     End Sub
     Private Function SetDefaultDatabase() As Boolean
         Dim isValid As Boolean = True
